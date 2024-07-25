@@ -29,13 +29,13 @@ class Constants:
 
     #Column name
     columns_name = {
-                    "BR":"br",
-                    "AA":"aa",
-                    "AJ/MOPF":"aj_mopf",
-                    "AJ/MOPF-Paket":"aj_paket",
-                    "Paket PU-Termin":"paket_pu_termin",
-                    "Paket-Projektleiter":"paket_projektleiter",
-                    "Bemerkung":"bemerkung",
-                    "Paketname":"paketname",
-                    "Paket-Status":"paket_status"
+                    "BR" : "br",
+                    "AA" : "aa",
+                    "AJ/MOPF" : "aj_mopf",
+                    "AJ/MOPF-Paket" : "aj_paket",
+                    "Paaket PU-Termin" : "paket_pu_termin",
+                    "Paketname" : "paketname",
+                    "Paket-Projektleiter" : "paket_projektleiter",
+                    "Bemerkung" : "bemerkung",
+                    "Paket-Status" : "paket_status"
                     }
