@@ -12,7 +12,7 @@ import numpy as np
 
 @pytest.fixture
 def sample_excel_path():
-    return '/Users/rakeshkumar/AndroidStudioProjects/dom-basic-input-data-service/lambda/function/H_Berichte/tests/AJ-Bericht_PKW_2024-03_AJ2024_AJ2025_AJ2026_1.xlsx'
+    return '/Users/rakeshkumar/AndroidStudioProjects/dom-basic-input-data-service/lambda/function/H_Berichte/src/tests/AJ-Bericht_PKW_2024-03_AJ2024_AJ2025_AJ2026_1.xlsx'
 
 @pytest.fixture
 def sample_excel_dataframe(sample_excel_path):
