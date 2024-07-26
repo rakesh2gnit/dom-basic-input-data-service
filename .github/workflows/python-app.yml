@@ -23,6 +23,10 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.12"
+    - name: Get File path
+      run: |
+        FILE_PATH=$(find $GITHUB_WORKSPACE -name "AJ-Bericht_PKW_2024-03_AJ2024_AJ2025_AJ2026_1.xlsx")
+        echo "The file is located at $FILE_PATH"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
