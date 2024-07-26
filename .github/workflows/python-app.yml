@@ -47,10 +47,10 @@ jobs:
         pytest
     - name: Run tests with coverage
       run: |
-        pytest --cov=./ --cov-report=xml
+        pytest --cov=./ --cov-report=html
       #continue-on-error: true
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
-        path: coverage.html
+        path: htmlcov/
