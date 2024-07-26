@@ -12,8 +12,8 @@ import numpy as np
 
 @pytest.fixture
 def sample_excel_path():
-    #return '/home/runner/work/dom-basic-input-data-service/dom-basic-input-data-service/lambda/function/H_Berichte/src/tests/AJ-Bericht_PKW_2024-03_AJ2024_AJ2025_AJ2026_1.xlsx'
-    return '/Users/rakeshkumar/AndroidStudioProjects/dom-basic-input-data-service/lambda/function/H_Berichte/src/tests/AJ-Bericht_PKW_2024-03_AJ2024_AJ2025_AJ2026_1.xlsx'
+    #return '/home/runner/work/dom-basic-input-data-service/dom-basic-input-data-service/lambda/function/HU_Variante/src/tests/AJ-Bericht_PKW_2024-03_AJ2024_AJ2025_AJ2026_1.xlsx'
+    return '/Users/rakeshkumar/AndroidStudioProjects/dom-basic-input-data-service/lambda/function/HU_Variante/src/tests_hu_variante/AJ-Bericht_PKW_2024-03_AJ2024_AJ2025_AJ2026_1.xlsx'
 
 @pytest.fixture
 def sample_excel_dataframe(sample_excel_path):
