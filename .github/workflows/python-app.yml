@@ -47,5 +47,10 @@ jobs:
         pytest
     - name: Run tests with coverage
       run: |
-        pytest --cov=/home/runner/work/dom-basic-input-data-service/dom-basic-input-data-service/lambda/function/H_Berichte/src tests/
+        pytest --cov=./ --cov-report=xml
       continue-on-error: true
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: coverage.xml
