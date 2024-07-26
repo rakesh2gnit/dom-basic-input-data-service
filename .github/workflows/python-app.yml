@@ -47,5 +47,5 @@ jobs:
         pytest
     - name: Run tests with coverage
       run: |
-        pytest --cov=/home/runner/work/dom-basic-input-data-service/dom-basic-input-data-service/ tests/
+        pytest --cov=/home/runner/work/dom-basic-input-data-service/dom-basic-input-data-service/lambda/function/H_Berichte/src tests/
       continue-on-error: true
