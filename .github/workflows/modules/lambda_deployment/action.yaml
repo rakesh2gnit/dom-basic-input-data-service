@@ -1,0 +1,44 @@
+name: "Deploy lambda code and configuration"
+
+description: "Module to deploy lambda code and configuration"
+inputs:
+  lambda_name:
+    description: "Name of the lambda function"
+    required: true
+  property_path:
+    description: "Json path to load the proper from yaml file. eg - '$.deploy.dev'"
+    required: true
+  multi_value_parsing:
+    description: "Set the value as 'true' if more than one proper has to be loaded from yaml file"
+    required: false
+    
+runs:
+  using: "composite"
+  steps:
+    - name: "Extracting info.yaml properties"
+      id: properties
+      run: |
+        cd ./.github/workflows/
+        echo ${{ github.workspace}}
+        echo $GITHUB_WORKSPACE
+        python3 ./scripts/load_properties.py $GITHUB_WORKSPACE"/lambda/functions/${{inputs.lambda_name}}/info.yaml" "${{ inputs.property_path }}" "${{ inputs.multi_value_parsing }}"
+      shell: bash
+
+    - name: "Deploy code to lambda function"
+      run: |
+        echo ${{ steps.properties.outputs.lambda_arn }}
+        cd $GITHUB_WORKSPACE/lambda/functions/${{inputs.lambda_name}}/src/
+        zip -r ${{ inputs.lambda_name }}.zip .
+        aws lambda update-function-code --function-name ${{ steps.properties.outputs.lambda_arn }} --zip-file fileb://${{ inputs.lambda_name }}.zip
+        echo "Upload code to lambda function successful"
+      shell: bash
+
+    - name: "Updating lambda function configuration"
+      run: |
+        sleep 30
+        echo ${{ steps.properties.outputs.environment }}
+        aws lambda update-function-configuration --function-name ${{ steps.properties.outputs.lambda_arn }} --timeout ${{steps.properties.outputs.timeout}} --memory-size ${{steps.properties.outputs.memory}} --environment "${{ steps.properties.outputs.environment }}"
+        echo "Update lambda function configuration"|
+      shell: bash
+
+    
