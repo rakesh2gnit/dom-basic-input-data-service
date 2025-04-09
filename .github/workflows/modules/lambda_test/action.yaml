@@ -1,0 +1,40 @@
+name: "Test Lambda Code"
+
+description: "Module to test python lambda code"
+inputs: 
+  lambda_name:
+    description: "Name of the lambda function"
+    required: true
+  property_path:
+    description: "Json path to the load the proper from yaml file. eg-'$.deploy.dev'"
+    required: true
+  multi_value_parsing:
+    description: "Set the value as 'true' if more than one proper has to be loaded from yaml file"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+     - name: "Extracting info.yaml properties"
+       id: properties
+       run: |
+        cd ./.github/workflows/
+        echo ${{ github.workspace}}
+        echo $GITHUB_WORKSPACE
+        python3 ./scripts/load_properties.py $GITHUB_WORKSPACE"/lambda/functions/${{inputs.lambda_name}}/info.yaml" "${{ inputs.property_path }}" "${{ inputs.multi_value_parsing }}"
+       shell: bash
+
+     - name: "Downloading python dependencies"
+       run: |
+        echo ${{ steps.properties.outputs.dependency }}
+        dependency_list = ${{ steps.properties.outputs.dependency }}
+        delimiter = ","
+        # Use IFS (internal Field Separator) to split the string into an array
+        IFS="$delimiter" read -ra items <<< "$dependency_list"
+        python3 -m pip install --upgrade pip
+        # Loop through the array and print each dependency
+        for item in "${items[@]}"; do
+            echo "Installing $item"
+            pip install -r "$item"
+        done
+       shell: bash
