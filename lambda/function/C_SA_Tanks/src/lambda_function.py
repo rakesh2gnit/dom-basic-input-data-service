@@ -23,8 +23,9 @@ def lambda_handler(event, context):
         logger.info(f"File {file_name} processed successfully")
         return result
     except Exception as e:
+        error_response = utils.generate_fail_response(file_name, e)
         error_report = utils.generate_fail_response(file_name, e)
-        message = f"{file_name} - {Constants.FAILED_MESSAGE}"
         db_handler.insert_data_log_api(error_report)
+        message = f"{file_name} - {Constants.FAILED_MESSAGE}"
         utils.send_teams_message(message, error_report)
         return error_report

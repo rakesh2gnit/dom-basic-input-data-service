@@ -4,7 +4,7 @@ from database import Database
 import pandas as pd
 import numpy as np
 import json
-from custom_exception import GenericException
+from custom_exception import BadRequestException
 
 def get_column_template():
     query = f"""
@@ -14,11 +14,12 @@ def get_column_template():
         with db.get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query)
-                return cursor.fetchone()
+                result = cursor.fetchone()
+                db.release_connection(conn)
+                return result           
     except Exception as e:
-        raise GenericException(f"Error fetching column templates: {e}")
-    finally:
-        db.release_connection()
+        raise BadRequestException(f"Error fetching column templates: {e}") from e
+ 
 
 def load_drive_template():
     query = f"""
@@ -40,11 +41,10 @@ def load_drive_template():
                 ))
                 inserted_id = cursor.fetchone()[0]
                 conn.commit()
+                db.release_connection(conn)
                 return inserted_id
     except Exception as e:
-        raise GenericException(f"Error loading drive template: {e}")
-    finally:
-        db.release_connection()
+        raise BadRequestException(f"Error loading drive template: {e}") from e
 
 def get_existing_file_name():
     query = f"""
@@ -56,11 +56,10 @@ def get_existing_file_name():
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 result = cursor.fetchall()
+                db.release_connection(conn)
                 return pd.DataFrame(result, columns=['file_name'])
     except Exception as e:
-        raise GenericException(f"Error fetching existing file name: {e}")
-    finally:
-        db.release_connection()
+        raise BadRequestException(f"Error fetching existing file name: {e}") from e
 
 def load_drive_content(file_name, file_path):
     query = f"""
@@ -84,11 +83,10 @@ def load_drive_content(file_name, file_path):
                 ))
                 inserted_id = cursor.fetchone()[0]
                 conn.commit()
+                db.release_connection(conn)
                 return inserted_id
     except Exception as e:
-        raise GenericException(f"Error loading drive content: {e}")
-    finally:
-        db.release_connection()
+        raise BadRequestException(f"Error loading drive content: {e}") from e
 
 def get_sa_tank_data(columns_to_insert):
     query = f"""
@@ -100,13 +98,12 @@ def get_sa_tank_data(columns_to_insert):
             with conn.cursor() as cursor:
                 cursor.execute(query)
                 result = cursor.fetchall()
+                db.release_connection(conn)
                 df_database = pd.DataFrame(result, columns=columns_to_insert)
                 df_database.replace({np.nan: None, pd.NaT: None}, inplace=True)
                 return df_database
     except Exception as e:
-        raise GenericException(f"Error fetching SA tank data: {e}")
-    finally:
-        db.release_connection()
+        raise BadRequestException(f"Error fetching SA tank data: {e}") from e
 
 def update_sa_tank_data(df_database, df_to_update, column_to_insert):
     for index, row in df_to_update.iterrows():
@@ -136,11 +133,10 @@ def update_sa_tank_data(df_database, df_to_update, column_to_insert):
                 with conn.cursor() as cursor:
                     cursor.execute(query, tuple(row[col] for col in column_to_insert if col != 'key') + (row['key'],))
                     conn.commit()
+                    db.release_connection(conn)
         except Exception as e:
             print(f"Error updating row: {e}, {row['key']}")
-            raise GenericException(f"Error updating SA tank data: {e}")
-        finally:
-            db.release_connection()
+            raise BadRequestException(f"Error updating SA tank data: {e}") from e
 
 def insert_sa_tank_data(df_to_insert, columns_to_insert):
     for index, row in df_to_insert.iterrows():
@@ -159,11 +155,10 @@ def insert_sa_tank_data(df_to_insert, columns_to_insert):
                     cursor.execute(query, tuple(row[col] for col in columns_to_insert))
                     conn.commit()
                     print("inserted in database: ", index, row['key'])
+                    db.release_connection(conn)
         except Exception as e:
             print(f"Error inserting row: {e}, {row['key']}")
-            raise GenericException(f"Error inserting SA tank data: {e}")
-        finally:
-            db.release_connection()
+            raise BadRequestException(f"Error inserting SA tank data: {e}") from e
 
 def insert_data_log_api(data):
     query = f"""
@@ -189,10 +184,11 @@ def insert_data_log_api(data):
             with conn.cursor() as cursor:
                 cursor.execute(query, values)
                 conn.commit()
+                db.release_connection(conn)
     except Exception as e:
-        raise GenericException(f"Error inserting data log table: {e}")
-    finally:
-        db.release_connection()
+        raise BadRequestException(f"Error inserting data log table: {e}") from e
+   
+        
 
 
 

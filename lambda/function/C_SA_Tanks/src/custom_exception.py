@@ -12,5 +12,17 @@ class GenericException(Exception):
     
 class DatabaseException(GenericException):
     def __init__(self, error_message):
+        GenericException.__init__(self, 502, error_message)
+
+class BadRequestException(GenericException):
+    def __init__(self, error_message):
+        GenericException.__init__(self, 400, error_message)
+
+class InternalServerException(GenericException):
+    def __init__(self, error_message):
         GenericException.__init__(self, 500, error_message)
+
+class AWSCredException(GenericException):
+    def __init__(self, error_message):
+        GenericException.__init__(self, 504, error_message)
 

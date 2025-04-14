@@ -4,6 +4,8 @@ import data_processing
 from datetime import datetime
 import ast
 from log import logger
+from custom_exception import GenericException
+from data_processing import data_transform
 
 logger = logger(service_name=Constants.DATADOG_SERVICE_NAME, lambda_function_name=Constants.DATADOG_FUNCTION_NAME)
 
@@ -30,7 +32,10 @@ def data_compare(df, sheet, file_name, file_path):
         if file_name not in db_file_name['file_name'].values:
             db_handler.load_drive_content(file_name, file_path)
 
-        df = data_processing.data_transform(df, sheet, column_template)
+        df = data_transform(df, sheet, column_template)
+
+        # df, error_object = data_validate(df)
+        error_object = []
 
         df["additional_data"] = None
         df["file_name"] = file_name
@@ -55,13 +60,7 @@ def data_compare(df, sheet, file_name, file_path):
         db_handler.insert_data_log_api(error_report)
         return error_report
     except Exception as e:
-        error_report["status"] = Constants.PROCESS_FAILED
-        error_report["progress"] = Constants.ERROR_PROGRESS
-        error_report["created_timestamp"] = (datetime.now()).strftime(Constants.TIMESTAMP_FORMAT)
-        error_report["error_report"] = [{"message":"something went wrong. Please check the logs"}]
-        error_report["info"] = info
-        db_handler.insert_data_log_api(error_report)
-        raise e
+        raise GenericException(f"Error in data_compare: {e}", error_report)
     
 def update_database(df, df_database, columns_to_insert):
     columns_to_insert = columns_to_insert + ['action', 'changes']

@@ -1,7 +1,8 @@
 from psycopg2 import pool
 from constants import Constants
 import os
-import utils
+from custom_exception import DatabaseException
+from utils import get_secret_dict
 
 class Database:
     _instance = None
@@ -15,7 +16,7 @@ class Database:
     def __init__(self):
         if not self._conn_pool:
             secret_name = Constants.DB_SECRET_NAME
-            creds = utils.get_secret_dict(secret_name)['SecretString']
+            creds = get_secret_dict(secret_name)['SecretString']
             db_params = {
                 "dbname": os.getenv("dbname"),
                 "user": os.getenv("username"),
@@ -35,18 +36,18 @@ class Database:
             if conn:
                 return conn
         except Exception as e:
-            raise utils.GenericException(f"Error getting connection from pool: {e}") from e
+            raise DatabaseException(f"Error getting connection from pool: {e}") from e
         
     def release_connection(self, conn):
         try:
             if conn:
                 self._conn_pool.putconn(conn)
         except Exception as e:
-            raise utils.GenericException(f"Error releasing connection back to pool: {e}") from e
+            raise DatabaseException(f"Error releasing connection back to pool: {e}") from e
         
     def close_all_connections(self):
         try:
             if self._conn_pool:
                 self._conn_pool.closeall()
         except Exception as e:
-            raise utils.GenericException(f"Error closing all connections in pool: {e}") from e
+            raise DatabaseException(f"Error closing all connections in pool: {e}") from e

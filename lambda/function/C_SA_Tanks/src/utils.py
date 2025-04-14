@@ -17,10 +17,17 @@ def generate_success_response(file_name):
     response = ResponseBuilder(status_code=200, response={"message": message, "file_name": file_name})
     return response.generate_response()
 
-def generate_fail_response(file_name, exception: GenericException):
-    message = f"{file_name} - {Constants.FAILURE_MESSAGE}"
+def generate_fail_response(file_name, exception: Exception):
+    # message = f"{file_name} - {Constants.FAILURE_MESSAGE}"
     logger.error(f"Failure response generated for {file_name}: {exception}")
-    response = ResponseBuilder(status_code=500, response={"message": message, "file_name": file_name})
+    if isinstance(exception, GenericException):
+        response = ResponseBuilder(status_code=exception.status_code, response={"message": exception.message, "file_name": file_name})
+    else:
+        response = ResponseBuilder(status_code=500, response={"message": str(exception), "file_name": file_name})
+    return response.generate_response()
+
+def generate_fail_errorM_reportmessage(file_name, exception: Exception):
+    logger.error(f"Failure error message generated for {file_name}: {exception}")
     error_report = {
         "drive_name": Constants.DRIVE_NAME,
         "file_name": file_name,
@@ -30,7 +37,11 @@ def generate_fail_response(file_name, exception: GenericException):
         "created_timestamp": datetime.now().strftime(Constants.DATE_FORMAT),
         "error_message": str(exception)
     }
-    return response.generate_response()
+    if isinstance(exception, GenericException):
+        error_report["error_message"] = exception.message
+    else:
+        error_report["error_message"] = str(exception)
+    return error_report
 
 def get_secret_dict(secret_name):
     """
@@ -46,7 +57,7 @@ def get_secret_dict(secret_name):
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
         return get_secret_value_response
     except ClientError as e:
-        logger.error(f"Error retrieving secret {secret_name}: {e}")
+        # logger.error(f"Error retrieving secret {secret_name}: {e}")
         raise GenericException(f"Error retrieving secret {secret_name}: {e}") from e
     
 def send_teams_message(msg, result):
