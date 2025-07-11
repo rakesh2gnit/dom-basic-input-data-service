@@ -18,7 +18,7 @@ def lambda_handler(event, context):
         logger.info(f"Processing file: {file_name} from bucket: {bucket_name}")
         result = data_compare(bucket_name, file_key)
         db_handler.insert_data_log_api(result)
-        message = f"{file_name} - {Constants.SUCCESS_ESSAGE_FILE_PROCESS}"
+        message = f"{file_name} - {Constants.SUCCESS_MESSAGE}"
         utils.send_teams_message(message, result)
         logger.info(f"File {file_name} processed successfully")
         return result
@@ -26,13 +26,13 @@ def lambda_handler(event, context):
         print("===GenericException===")
         error_report = utils.generate_error_report(file_name, e)
         db_handler.insert_data_log_api(error_report)
-        message = f"{file_name} - {Constants.FAILED_MESSAGE_FILE_PROCESS}"
+        message = f"{file_name} - {Constants.FAILED_MESSAGE}"
         utils.send_teams_message(message, error_report)
         return error_report
     except Exception as e:
         print("===Exception===")
         error_report = utils.generate_error_report(file_name, e)
         db_handler.insert_data_log_api(error_report)
-        message = f"{file_name} - {Constants.FAILED_MESSAGE_FILE_PROCESS}"
+        message = f"{file_name} - {Constants.FAILED_MESSAGE}"
         utils.send_teams_message(message, error_report)
         return error_report
