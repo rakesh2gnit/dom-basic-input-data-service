@@ -2,6 +2,7 @@ from psycopg2 import pool
 from constants import Constants
 from custom_exception import DatabaseException
 from utils import get_secret_dict
+from contextlib import contextmanager
 
 class Database:
     _instance = None
@@ -44,3 +45,11 @@ class Database:
     def close_all_connections(self):
         if self._connection_pool:
             self._connection_pool.closeall()
+
+    @contextmanager
+    def connection(self):
+        conn = self.get_connection()
+        try:
+            yield conn
+        finally:
+            self.release_connection(conn)

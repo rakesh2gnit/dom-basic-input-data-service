@@ -1,6 +1,7 @@
 import pytest
 from types import SimpleNamespace
 from src.database import Database
+from src.database import DatabaseException
 
 # Dummy/Fake classes
 class FakeConnection:
@@ -19,6 +20,11 @@ class FakePool:
 
     def closeall(self):
         self.conn.closed = True
+
+@pytest.fixture(autouse=True)
+def reset_singleton():
+    Database._instance = None
+    Database._connection_pool = None
 
 @pytest.fixture
 def mock_constants(monkeypatch):
@@ -51,3 +57,26 @@ def test_close_all_connections(mock_constants, mock_secret, mock_pool):
     conn = db.get_connection()
     db.close_all_connections()
     assert conn.closed is True
+
+def test_connection_context_manager(mock_constants, mock_secret, mock_pool):
+    db = Database()
+    with db.connection() as conn:
+        assert isinstance(conn, FakeConnection)
+
+def test_release_none_connection(mock_constants, mock_secret, mock_pool):
+    db = Database()
+    # Should not raise error even if connection is None
+    db.release_connection(None)
+
+def test_get_connection_raises_exception(mock_constants, mock_secret, monkeypatch):
+    class BrokenPool:
+        def getconn(self):
+            raise Exception("Pool broken")
+
+    monkeypatch.setattr("src.database.pool.SimpleConnectionPool", lambda *args, **kwargs: BrokenPool())
+    
+    db = Database()
+
+    with pytest.raises(DatabaseException) as exc:
+        db.get_connection()
+    assert "Error getting connection from pool" in str(exc.value)

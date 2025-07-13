@@ -59,4 +59,6 @@ class Constants:
     SUCCESS_MESSAGE = "- file has been proccessed successfully."
     FAILED_MESSAGE = "- file has been failed."
     ERROR_MESSAGE = "Something went wrong while processing the file. Please contact support team."
-    EMPTY_DATA_MESSAGE = "The uploaded file has no data."   
+    EMPTY_DATA_MESSAGE = "The uploaded file has no data."
+    GENERIC_ERROR_MSG = "GenericException occurred"
+    UNKNOWN_ERROR_MSG = "Unexpected exception occurred"

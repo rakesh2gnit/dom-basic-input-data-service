@@ -94,3 +94,12 @@ def test_error_message():
 
 def test_empty_data_message():
     assert Constants.EMPTY_DATA_MESSAGE == "The uploaded file has no data."
+
+def test_generic_error_msg():
+    assert Constants.GENERIC_ERROR_MSG == "GenericException occurred"
+
+def test_unknown_error_msg():
+    assert Constants.UNKNOWN_ERROR_MSG == "Unexpected exception occurred"
+
+# To get code coverage report, run:
+# pytest --cov=. --cov-report=term --cov-report=html
