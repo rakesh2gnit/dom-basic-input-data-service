@@ -106,22 +106,26 @@ def read_file_from_s3(bucket_name, file_key):
     
 def data_transform(df, sheet, key_columns):
     try:
-        df = df.dropna(how='all', inplace=True)  # Drop rows where all key columns are NaN
+        df = df.dropna(how='all')  # Drop rows where all key columns are NaN
         df.replace({np.nan: None, pd.NaT: None}, inplace=True)  # Replace NaN and NaT with None
 
         if sheet:
-            color_map = {
-                'FF00B050': 2,
-                'FFFF0000': 1,
-                'FFC00000': 1
-            }
-            statuses = []
+            color_check = []
             for row in sheet.iter_rows(min_row=2, max_row=df.shape[0] + 1):
                 cell = row[2]
-                font_color = cell.font.color.rgb if cell.font.color else None
-                statuses.append(color_map.get(font_color, 3))
-            df['status'] = pd.to_numeric(statuses, errors='coerce').astype('int')
-
+                if cell.font.color:
+                    font_color = cell.font.color.rgb
+                else:
+                    font_color = None
+                if font_color == "FF00B050":
+                    color_check.append(2)  # Green
+                elif font_color in ("FFFF0000", "FFC00000"):
+                    color_check.append(1)  # Red
+                else:
+                    color_check.append(3)  # No color
+            df["status"] = color_check
+            df['status'] = pd.to_numeric(df['status'], errors='coerce').astype('int')
+            
         df['key'] = df.apply(lambda row: "_".join(map(str, [row[col] for col in key_columns])), axis=1)
         return df
     except Exception as e:

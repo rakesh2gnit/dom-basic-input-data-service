@@ -8,7 +8,6 @@ from src.utils import (
     send_teams_message,
     validate_column_template
 )
-from src.custom_exception import AWSSecretException, ColumnValidationException
 from src.constants import Constants
 
 

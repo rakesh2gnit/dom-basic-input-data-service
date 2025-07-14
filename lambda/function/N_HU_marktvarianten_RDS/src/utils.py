@@ -1,5 +1,4 @@
 from constants import Constants
-from response_builder import ResponseBuilder
 from custom_exception import AWSSecretException, GenericException, ColumnValidationException
 import json
 import os

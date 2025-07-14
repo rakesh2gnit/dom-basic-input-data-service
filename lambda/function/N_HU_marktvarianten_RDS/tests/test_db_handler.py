@@ -2,10 +2,7 @@ import pytest
 import pandas as pd
 from datetime import datetime
 from src.constants import Constants
-from src.database import Database
-import json
 from src.db_handler import (
-    run_query,
     get_column_template,
     load_drive_template,
     get_existing_file_name,
