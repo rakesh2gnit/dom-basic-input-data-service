@@ -1,0 +1,33 @@
+name: :Identify Stage for deployment"
+
+description: "Identifies the stage for deployment using branch name"
+outputs:
+  stage:
+    description: "The stage for deployment"
+    value: ${{ steps.identify_stage.outputs.stage }}
+runs:
+  using: "composite"
+  steps:
+    - name: Identify Stage
+      id: identify_stage
+      run: |
+        #!/bin/bash
+            case "${{github.ref_name}}" in
+                *develop*)
+                    echo "stage=dev" >> "$GITHUB_OUTPUT"
+                    ;;
+                *int*)
+                    echo "stage=int" >> "$GITHUB_OUTPUT"
+                    ;;
+                *release/*)
+                    echo "stage=int" >> "$GITHUB_OUTPUT"
+                    ;;
+                *prod*)
+                    echo "stage=prod" >> "$GITHUB_OUTPUT"
+                    ;;
+                *)
+                    echo "stage=dev" >> "$GITHUB_OUTPUT"
+                    ;;
+            esac
+      shell: bash
+        
