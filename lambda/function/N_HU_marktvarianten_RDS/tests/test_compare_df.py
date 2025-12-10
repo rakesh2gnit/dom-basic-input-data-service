@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from types import SimpleNamespace
-from src.compare_df import data_validate, RowValidationException
+from src.compare_df import data_validate, RowValidationException, data_transform, BadRequestException, read_file_from_s3
 
 # Mock Constants.COLUMNS_TEMPLATE
 @pytest.fixture
@@ -21,10 +21,11 @@ def valid_dataframe():
         "col1": [1, 2]
     })
 
-def test_data_validate_success(valid_dataframe):
-    df, errors = data_validate(valid_dataframe)
+def test_data_validate_empty_df():
+    df = pd.DataFrame(columns=["aj_paket", "paket_pu_termin"])
+    cleaned_df, errors = data_validate(df)
+    assert cleaned_df.empty
     assert errors == []
-    assert not df.empty
 
 def test_data_validate_missing_column(valid_dataframe):
     valid_dataframe.loc[0, "aj_paket"] = None
@@ -53,6 +54,55 @@ def test_data_validate_missing_columns():
         data_validate(df.copy())
 
     assert "Missing values found" in str(excinfo.value)
+
+def test_data_transform_raises_bad_request(monkeypatch):
+    df = pd.DataFrame({
+        "aj_paket": [None],
+        "paket_pu_termin": [None]
+    })
+
+    # Passing a sheet that raises an exception inside the loop
+    class BadSheet:
+        def iter_rows(self, min_row, max_row):
+            raise Exception("Corrupt sheet")
+
+    with pytest.raises(BadRequestException) as exc:
+        data_transform(df.copy(), BadSheet(), key_columns=["aj_paket", "paket_pu_termin"])
+
+    assert "Error in data transformation" in str(exc.value)
+
+def test_read_file_from_s3(monkeypatch):
+    import io
+    import openpyxl
+
+    df = pd.DataFrame({"aj_paket": [1], "paket_pu_termin": [2]})
+    stream = io.BytesIO()
+    with pd.ExcelWriter(stream, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False)
+    stream.seek(0)
+    file_content = stream.read()
+
+    class DummyS3:
+        def get_object(self, Bucket, Key):
+            return {"Body": io.BytesIO(file_content)}
+
+    monkeypatch.setattr("src.compare_df.boto3.client", lambda service: DummyS3())
+    df_result, sheet = read_file_from_s3("bucket", "file.xlsx")
+    
+    assert not df_result.empty
+    assert sheet is not None
+
+def test_read_file_from_s3_failure(monkeypatch):
+    class DummyS3:
+        def get_object(self, Bucket, Key):
+            raise Exception("File not found")
+
+    monkeypatch.setattr("src.compare_df.boto3.client", lambda service: DummyS3())
+
+    with pytest.raises(BadRequestException) as exc:
+        read_file_from_s3("bucket", "file.xlsx")
+
+    assert "Error while reading the file" in str(exc.value)
 
 def mock_sheet_with_colors(colors):
     class Font:

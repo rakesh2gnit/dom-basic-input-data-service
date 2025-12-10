@@ -30,6 +30,8 @@ def run_query(query, params=None, fetch="all", to_df_columns=None):
     except Exception as e:
         logger.error(f"Database operation failed: {e}")
         raise DatabaseException("Database operation failed. Please connect with dev team.")
+    finally:
+        db.release_connection(conn)
     
 
 def get_column_template():
