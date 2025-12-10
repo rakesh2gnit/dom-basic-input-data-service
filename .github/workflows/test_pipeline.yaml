@@ -1,0 +1,29 @@
+name: Test CI/CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-git:
+    runs-on: [self-hosted]
+    container: 
+      image: public.ecr.aws/s3q4j616/ps-cicd-image:latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Setting up git context
+        run: |
+          sh -c "git config --global --add safe.directory $PWD"
+
+      - name: git fetch commits
+        run: |
+          git fetch --all
+        shell: bash
+
+      - name: run git cmds
+        run: |
+          echo $GITHUB_WORKSPACE
+          python3 ./.github/workflows/scripts/run_git_cmds.py
+        shell: bash

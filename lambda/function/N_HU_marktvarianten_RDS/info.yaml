@@ -1,0 +1,36 @@
+test:
+  dependency:
+    - "./lambda/layers/test/requirements.txt"
+    - "./lambda/layers/common/requirements.txt"
+
+deploy:
+  dev:
+    lambda_arn: arn:aws:lambda:eu-central-1:123456789012:function:N_HU_marktvarianten_RDS-dev
+    environment:
+      Variables:
+        ENVIRONMENT: DEV
+        DB_SCHEMA: basic_data_dev
+        dbname: postgres
+        username: root
+        host: om-euc1-dev-basic-data-aurora.cluster-c123456789012.eu-central-1.rds.amazonaws.com
+        port: "5432"
+        region: eu-central-1
+        secret_name: basic_data_dev_secret
+        teams_webhook_secret_name: teams_webhook_dev
+    memory: 256
+    timeout: 30
+  int:
+    lambda_arn: arn:aws:lambda:eu-central-1:123456789012:function:N_HU_marktvarianten_RDS-int
+    environment:
+      Variables:
+        ENVIRONMENT: INT
+        DB_SCHEMA: basic_data_int
+        dbname: postgres
+        username: root
+        host: om-euc1-int-basic-data-aurora.cluster-c123456789012.eu-central-1.rds.amazonaws.com
+        port: "5432"
+        region: eu-central-1
+        secret_name: basic_data_int_secret
+        teams_webhook_secret_name: teams_webhook_int
+    memory: 256
+    timeout: 30
